@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lern-App</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f7f6f2;--card:#fff;--tx:#1d2420;--mu:#6b746e;--ac:#1f7a5a;--acs:#dff1e9;--bd:#e2e0d8;--bad:#b3392f;--ok:#1f7a5a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141815;--card:#1c221e;--tx:#ecefe9;--mu:#98a39b;--ac:#4fc99a;--acs:#21342b;--bd:#2c3530;--bad:#ff8a7d;--ok:#4fc99a}}
+:root[data-theme="dark"]{--bg:#141815;--card:#1c221e;--tx:#ecefe9;--mu:#98a39b;--ac:#4fc99a;--acs:#21342b;--bd:#2c3530;--bad:#ff8a7d;--ok:#4fc99a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+main{max-width:720px;margin:0 auto;padding:14px 14px 110px}
+h1{font-size:20px;margin:4px 0 10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:10px 0}
+button,.btn{font:inherit;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:9px 14px;border-radius:12px;cursor:pointer}
+button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+button.pri{background:var(--ac);color:#fff;border-color:var(--ac)}
+button:disabled{opacity:.5}
+textarea,input[type=text]{width:100%;font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px}
+textarea{min-height:240px;resize:vertical}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin:10px 0}
+.mu{color:var(--mu);font-size:14px}
+#view{white-space:pre-wrap;user-select:text;-webkit-user-select:text}
+a.t{color:var(--ac);text-decoration:underline;cursor:pointer}
+.opt{display:block;width:100%;text-align:left;margin:6px 0}
+.opt.ok{border-color:var(--ok);background:var(--acs)}.opt.no{border-color:var(--bad)}
+.flip{min-height:120px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:18px;cursor:pointer}
+#sheet{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--bd);border-radius:18px 18px 0 0;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));max-height:62vh;overflow:auto;box-shadow:0 -8px 30px #0003;display:none}
+#sheet h3{margin:0 0 6px}
+#sel{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);display:none;box-shadow:0 4px 18px #0004}
+.hide{display:none}
+</style>
+</head>
+<body>
+<main>
+<h1>🧬 Bio-Lern-App</h1>
+<div class="row" id="subj"></div>
+<div class="tabs" id="tabs"></div>
+<div id="pane"></div>
+</main>
+<button id="sel" class="pri">💡 Erklären</button>
+<div id="sheet"></div>
+
+<script>
+const TABS=[["sum","Zusammenfassung"],["mat","Material"],["cards","Karten"],["quiz","Quiz"],["wiki","Lexikon"]];
+let S={subs:[{name:"Bio",text:"",cards:[],quiz:[]}],wiki:{}};
+try{const r=localStorage.getItem("lernapp_bio")||localStorage.getItem("lernapp");if(r)S=JSON.parse(r)}catch(e){}
+const SEED={Bio:`MEERESBIOLOGIE
+
+Die Meeresbiologie ist ein Teilgebiet der Biologie, das sich mit den Lebewesen der Meere und ihren Wechselwirkungen mit der marinen Umwelt beschäftigt. Untersucht werden sowohl einzelne Organismen als auch komplexe Ökosysteme.
+
+Teilgebiete:
+- Ökologie: Beziehung zwischen Organismus und Umwelt
+- Zoologie: Erforschung der Meerestiere
+- Botanik und Phykologie: Untersuchung von Algen und anderen photosynthetisch aktiven Organismen
+- Mikrobiologie: Erforschung mariner Mikroorganismen
+- Evolution und Genetik: Entstehung und Veränderung von Arten und Anpassungen
+- Physiologie: Funktionsweise von Organismen unter marinen Bedingungen
+
+Die Bedeutung der Meere
+Die Ozeane bedecken etwa 71 % der Erdoberfläche und sind der größte zusammenhängende Lebensraum der Erde. Sie beherbergen eine enorme biologische Vielfalt. Wichtige Funktionen für das globale Ökosystem:
+- Klimaregulation: Die Ozeane speichern große Mengen an Wärme und beeinflussen so das Klima. Sie nehmen einen erheblichen Teil des vom Menschen produzierten CO2 auf.
+- Sauerstoffproduktion: Phytoplankton und andere photosynthetisch aktive Organismen produzieren Sauerstoff. Die marine Primärproduktion ist ein wichtiger Bestandteil des globalen Kohlenstoff- und Sauerstoffkreislaufs.
+- Stoffkreisläufe: In den Meeren finden komplexe Kreisläufe von Kohlenstoff, Sauerstoff, Phosphor und anderen Elementen statt.
+- Lebensraum und Biodiversität: Von Korallenriffen und Küstengebieten bis zur Tiefsee gibt es zahlreiche unterschiedliche marine Lebensräume.
+- Wärmehaushalt (siehe Grafiken: Wärmehaushalt, mariner Kohlenstoffkreislauf mit physikalischer und biologischer Kohlenstoffpumpe)
+
+Der Golfstrom
+Der Golfstrom ist eine warme Meeresströmung im Atlantischen Ozean. Er transportiert warmes Wasser aus den Tropen Richtung Norden und beeinflusst dadurch das Klima im Nordatlantik und in Europa. Er ist Teil eines größeren Systems, der atlantischen meridionalen Umwälzzirkulation.
+Faktoren der großräumigen Zirkulation:
+- Wind bewegt das Oberflächenwasser
+- Die Corioliskraft beeinflusst die Richtung der Meeresströmungen
+- Temperatur beeinflusst die Dichte des Wassers
+- Salzgehalt beeinflusst ebenfalls die Dichte
+- Dichteres Wasser kann absinken und Tiefenströmungen bilden
+
+Sommerstagnation
+Im Sommer erwärmt die Sonneneinstrahlung die Oberfläche des Sees. Das warme Wasser hat eine geringere Dichte und bleibt oben. Es entsteht eine stabile Schichtung mit drei Bereichen:
+- Epilimnion: warme obere Wasserschicht
+- Metalimnion (Sprungschicht): Übergangsbereich mit starkem Temperaturabfall
+- Hypolimnion: kalte Tiefwasserschicht
+Folgen: O2 gelangt nur begrenzt in tiefere Schichten; Nährstoffe können sich im Tiefwasser anreichern; die Lebensbedingungen unterscheiden sich zwischen den Wasserschichten.
+
+Winterstagnation
+Im Winter kühlt das Oberflächenwasser ab. Wasser mit etwa 4 °C hat die höchste Dichte und sinkt ab. Fällt die Temperatur an der Oberfläche unter 4 °C, bleibt das Wasser wegen der niedrigeren Dichte oben. Bei Temperaturen unter 0 °C gefriert die Oberfläche.
+
+Frühjahrs- und Herbstzirkulation (besonders wichtig für das Ökosystem)
+- Frühjahr: Nach dem Winter erwärmt sich das Oberflächenwasser. Haben große Teile des Sees die gleiche Temperatur/Dichte, können Wind und Wetter das Wasser durchmischen. Folge: Sauerstoff gelangt in die Tiefe, Nährstoffe aus der Tiefe nach oben.
+- Herbst: Das Oberflächenwasser kühlt ab, wird dichter und sinkt nach unten. Dadurch kann erneut eine vollständige Durchmischung entstehen. Auch sie trägt zum Austausch von Sauerstoff und Nährstoffen bei.
+
+Lebensräume im Meer
+Die Lebensbedingungen verändern sich abhängig von Tiefe, Licht, Temperatur, Salzgehalt, Druck und Nährstoffangebot.
+- Küstenzone: gehört zu den biologisch produktivsten Lebensräumen (Mangroven, Seegraswiesen, Wattgebiete, Fels- und Sandküsten, Korallenriffe). Sie bieten Nahrung und Schutz für zahlreiche Organismen.
+- Offener Ozean (Pelagial): Organismen leben in der freien Wassersäule. Plankton: treibt überwiegend mit den Wasserbewegungen. Nekton: schwimmt aktiv (Fische, Wale, Oktopoden). Neuston: lebt unmittelbar an oder unter der Wasseroberfläche.
+- Meeresboden (Benthal): Lebensraum z. B. von Muscheln, Würmern, Krebsen, Stachelhäutern. Mit zunehmender Tiefe nehmen Lichtintensität und Temperatur ab, der Wasserdruck nimmt stark zu.
+
+Nahrungsketten und Nahrungsnetze
+Produzenten bilden die Grundlage vieler mariner Nahrungsnetze. Vereinfachtes Beispiel: Phytoplankton → Zooplankton → kleiner Fisch → Raubfisch → Meeressäuger. In Wirklichkeit sind marine Ökosysteme viel komplexer, daher spricht man eher von Nahrungsnetzen. Die Energie stammt überwiegend aus Sonnenenergie, die durch Photosynthese in chemische Energie umgewandelt wird.
+In der Tiefsee gibt es auch Ökosysteme, die unabhängig vom Sonnenlicht funktionieren: An hydrothermalen Quellen nutzen bestimmte Bakterien die Energie chemischer Reaktionen. Dieser Prozess heißt Chemosynthese.
+
+Aufgabe A1 (biotische und abiotische Faktoren)
+- Löwenzahn. Biotisch: Fressfeinde, Pilzbefall. Abiotisch: Luftdruck, Temperatur, Relief, Niederschlag, Bodenbeschaffenheit.
+- Steinkoralle. Biotisch: Plankton (Nahrung), Symbiose (Alge). Abiotisch: Wasserdruck, Lichtintensität, Salzgehalt, O2-Gehalt, Meeresströmungen, Nährstoffe, Mineralien.
+Aufgabe A2: Korallenriffe brauchen eine Meerestemperatur zwischen 20 und 30 °C (bis etwa 30. Breitengrad), beständige Lichtintensität, beständigen Salz- und Mineralstoffgehalt. Sauberes Wasser ist ebenfalls ein wichtiger Faktor.
+
+DIE LEBENSRÄUME (Adria, Kroatien)
+Felsenküste: Der felsige Strand über der Hochwasserlinie liegt im Wellenschlag- oder Spritzwasserbereich des Supralitorals. Die graue bis braunschwarze Färbung des Kalkgesteins nahe der Wasserlinie wird durch endolithische (im Gestein bohrende) Cyanobakterien verursacht. Sie können Luftstickstoff (N2) spalten und für den Aufbau von Körperstrukturen nutzen. Der Felsenstrand ist eine wüstenartige Zone mit extremen Wechseln zwischen Hitze und Abkühlung, Feuchtigkeit und Trockenheit sowie Süß- und Salzwasser. Nur eine Handvoll Lebewesen siedelt sich dauerhaft hier an.
+
+Blockgrund: Gesteinsblöcke, die wegen ihrer Tiefe oder wellengeschützten Lage sehr lange liegen. Dadurch sind sie eher kantig und stark bewachsen. Durch tierischen Aufwuchs (Schwämme, Kalkröhrenwürmer, Moostierchen) und pflanzlichen Aufwuchs (Kalkrotalgen) werden die Blöcke regelrecht miteinander verkittet. Das Blockfeld wird stabiler, es bildet sich ein dauerhafter Lücken- und Spaltenraum, der unzähligen beweglichen und sesshaften Tieren verschiedener Größe als Lebensraum dient.
+
+Höhlen und Schattenbereich: Hier findet man z. B. Schwämme (Porifera) und Moostierchen (Bryozoa). Kalkröhrenwürmer (Polychaeta) und Wurmschnecken (Gastropoda) breiten ihre Kalkröhren am Substrat aus, trotz hohem Raumkonkurrenzdruck durch schnellwüchsige Algen. Durch ständiges Übereinanderwachsen entstehen kalkige Riffstrukturen biogenen Ursprungs, sogenannte Bioherme. Nur die oberen Zentimeter sind belebt. Die Kalkmasse im Untergrund kann über Jahrhunderte mehrere Meter dick werden, das Jahreswachstum beträgt aber nur wenige mm. Den Hauptteil der Kalkmasse bilden die Kalkrotalgen (Corallinaceae), die sekundär stark von bohrenden Organismen durchlöchert wird.
+
+Meereshöhlen: Die kroatische Adriaküste ist für ihren hohen Anteil an Karbonatgestein bekannt. Durch Verwitterung (Kohlensäure) und Ausfällung von Kalkstein entsteht der Karst. Verkarstung ist die allmähliche Zersetzung (Korrosion) des Gesteins, begünstigt durch tektonische Verbindungen, mechanische Belastung, Niederschlag und Klima. Gewaltige Aushöhlungen sind nichts Seltenes. Da die dalmatinische Küste eine „Untertauch-Küste“ ist, sind viele Höhlensysteme im Meer versunken. Auch die Wellenbewegung trägt zur Abtragung und Aushöhlung bei. So entstand ein spezifischer Lebensraum für angepasste Meeresbewohner.
+Höhlentypen: Grotte, Durchgang, Sackhöhle (mit Luftkuppel), Tunnel, Randhöhle.
+
+Zonierung durch Licht
+Das auf die Gewässeroberfläche treffende Licht wird nur zu einem kleinen Teil reflektiert. Der größere Teil dringt ein und wird mit zunehmender Tiefe absorbiert. Die Wellenlängen werden unterschiedlich stark aufgenommen: Rot wird stark absorbiert, Blau nicht so stark, weshalb Blau in größere Tiefen vordringt. Mit zunehmender Tiefe nimmt die für die Photosynthese verfügbare Strahlung ab. Bei etwa 1 % der photosynthetisch aktiven Strahlung liegt der Kompensationshorizont. Darüber liegt die euphotische Zone (positive Energiebilanz durch Photosynthese möglich), darunter die dysphotische Zone (Licht reicht dafür nicht mehr aus). Lichtverfügbarkeit ist ein wichtiger abiotischer Faktor für Verteilung und Zonierung.
+
+Vertikale Zonierung nach Licht und Algenvorkommen
+- Infralitoral (Starklichtzone): im Mittelmeer je nach Wasserklarheit (Plankton) 15 bis 50 m; Braunalgen, Grünalgen, Seegräser
+- Circalitoral (Schwachlichtzone): bis zum Kompensationshorizont (darunter negative Energiebilanz für Pflanzen); Rotalgen
+- Bathyal: nur mehr Kieselalgen (einzellig)
+
+Ernährungstabelle (Lebewesen | Ernährungsweise | Ernährungsebene | aktiv/passiv | Fein-/Grobpartikel)
+- Alge | Photosynthese | Produzent | - | -
+- Kalkröhrenwurm | Filtrieren, strudelt mit Cilien Nahrung herbei | Konsument, Destruent | aktiv | fein
+- Steinkoralle | Photosynthese/Filtrieren, fängt mit Nesselzellen Plankton | Produzent/Konsument | passiv | grob (fein bei Unterart)
+- Wurmschnecke | Filtrieren, fängt mit Schleimnetz v. a. abgestorbene Organismen | Destruent | passiv | grob
+- Schwamm | Filtrieren, strudelt mit Geißeln Plankton | Konsument/Destruent | aktiv | fein
+
+Lebensraum Seegras (Seegrasphytal)
+Seegraswiesen der Sedimentböden: Pflanzenlebensräume (Phytal) sind hochdiverse Biotope. Sie beherbergen viele kleine Spezialisten und bieten Konsumenten weiter oben in der Nahrungskette sichere Verstecke und Nahrung. Die meisten Fische wachsen entweder dort auf oder verbringen dort ihr ganzes Leben. Seegräser sind mit den Algen die zweitgrößte Pflanzengruppe des Meeres. Sie sind Gefäßpflanzen mit Wurzelsystemen und Rhizomen, weil sie von Landpflanzen abstammen.
+
+Die Gefährdung der Meere (Greenpeace-Artikel, Überschriften): Die Meere sind zu warm, zu hoch, zu sauer, zu leer, zu verschmutzt.
+
+
+=====
+IMMUNBIOLOGIE
+
+Zentrale Organe des Immunsystems: Schleimhäute, Mandeln, Thymusdrüse, Knochenmark, Lymphknoten, Haut, Milz, Darm.
+
+Angeborenes und erworbenes Immunsystem
+Unspezifische Abwehr (angeboren):
+- Erkennung von Krankheitserregern durch Makrophagen, dendritische Zellen und neutrophile Granulozyten
+- Schnelle Reaktion durch neutrophile Granulozyten und natürliche Killerzellen, die Erreger unspezifisch bekämpfen
+- Phagozytose und Abtötung von Erregern durch neutrophile Granulozyten
+- Allgemeine Entzündungsreaktion und Mobilisierung des Immunsystems durch Zytokine
+Spezifische Abwehr (erworben/adaptiv):
+- Adaptive Immunantwort durch T-Zellen und B-Zellen, die spezifisch auf bestimmte Erreger reagieren
+- Produktion von Antikörpern durch B-Zellen, die an spezifische Antigene binden und Erreger markieren
+- Bildung eines immunologischen Gedächtnisses durch T- und B-Zellen: schnellere, effizientere Reaktion bei erneuter Exposition
+
+Video-Notizen (Kurzgesagt): Das Immunsystem ist nach dem Gehirn die komplexeste Körperstruktur. 1. Makrophage. 2. Neutrophile (Lebensdauer 3 Tage). 3. Entzündung entsteht (viel Flüssigkeit). 4. T-Zellen (Abwehr gegen jedwede Krankheit). 5. B-Zellen (Antikörper-Ersteller). 6. B-Zellen bilden Antikörper, diese kleben Bakterien zusammen. 7. Viele Zellen sterben nach der Infektion; T- und B-Zellen werden zu Gedächtniszellen.
+
+Action Story (Sicht der Fresszelle/Makrophage)
+Erreger durchbrechen die Schutzbarriere und infizieren Wirtszellen. Die Fresszelle frisst den ersten Angreifer (Phagozytose), präsentiert Antigene des Erregers auf ihrer Oberfläche und eilt zur Steuerzentrale (Lymphknoten). Dort aktiviert sie die Helferzelle (T-Helferzelle), die den Gegenschlag koordiniert. Diese aktiviert die Killerzellen (zerstören infizierte Wirtszellen) und die Plasmazellen (bilden Millionen maßgeschneiderter Antikörper). Die Antikörper kleben an den Erregern und verklumpen sie. Die Fresszellen fressen die Klumpen auf. Das Gedächtnis (Gedächtniszellen) ist bereit für den nächsten Einsatz.
+
+Aktive und passive Immunabwehr (Impfung)
+Ein Impfstoff-Antigen muss:
+1. ungefährlich sein: Es darf die Krankheit nicht auslösen. Deshalb verwendet man abgeschwächte oder abgetötete Erreger bzw. nur Bruchstücke (z. B. Oberflächenproteine).
+2. vom Immunsystem erkannt werden: Es muss die gleichen Oberflächenmerkmale wie der echte Erreger tragen, damit Antikörper und Gedächtniszellen später zum echten Erreger passen.
+Erklärung des lang anhaltenden Schutzes: Bei der aktiven Immunisierung wird ein harmloses Antigen gespritzt, das Immunsystem bildet Antikörper und Gedächtniszellen, die über Jahre, manchmal lebenslang im Körper bleiben. Kommt der echte Erreger, erkennen sie ihn sofort, vermehren sich schnell und es werden in kurzer Zeit sehr viele Antikörper gebildet. Bei der passiven Immunisierung fehlen die Gedächtniszellen, daher hält der Schutz nur wenige Wochen.
+Passive Immunisierung: Ein Tier wird mit dem Erreger oder seinem Gift immunisiert und bildet Antikörper, die aus seinem Blutserum gewonnen werden. Der Körper bekommt nur fertige Antikörper und bildet keine Gedächtniszellen, deshalb sind die Antikörper nach einigen Wochen abgebaut und der Schutz endet.
+
+Aufgabe 4 (Grippeimpfung)
+A. Aktiv oder passiv? Aktive Immunisierung.
+B. 75-jähriger Opa und schwangere Nachbarin: Beide sollen sich impfen lassen. Die Impfung wird empfohlen, weil bei beiden das Immunsystem anfälliger ist.
+C. „Trotz Grippeimpfung erkältet“: Entweder eine Impfreaktion mit leichten Grippesymptomen, oder es ist eine andere Erkältung (grippaler Infekt). Eine Erkältung wird durch andere Viren verursacht, die die Grippeimpfung nicht abdeckt.
+D. Warum jährlich impfen? Grippeviren mutieren, daher muss der Impfstoff jedes Jahr angepasst werden.
+
+Vergleich aktive und passive Immunisierung
+- Aktive (Schutzimpfung): Der Körper bildet selbst Antikörper (AK) und Gedächtniszellen als Reaktion auf abgeschwächte oder tote Erreger. Schutz langfristig, oft mehrere Jahre bis lebenslang (Gedächtniszellen). Beginn verzögert, da der Körper erst AK bilden muss (nach einigen Wochen). Beispiele: Vorbeugung gegen Masern, Tetanus, FSME, Corona, Polio.
+- Passive (Heilimpfung): Fertige AK werden direkt verabreicht. Schutz kurzfristig, da AK mit der Zeit abgebaut werden. Beginn sofort, da AK direkt verfügbar sind. Anwendung: akute Notfälle/Infektionen, wenn kein ausreichender Immunschutz vorhanden ist (z. B. Tetanus, Tollwut).
+(Skizze: Antikörperkonzentration über die Zeit, passiv schnell aber kurz, aktiv verzögert aber lang.)
+
+Allergie: eine Überreaktion des Immunsystems.
+Autoimmunerkrankung: Das Immunsystem arbeitet gegen den eigenen Körper.`};
+S.subs=S.subs.filter(s=>s.name!=="Chemie");if(!S.subs.length)S.subs=[{name:"Bio",text:"",cards:[],quiz:[]}];
+const sub0=()=>S.subs[0];
+const shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const RAW=[
+["Wie viel Prozent der Erdoberfläche bedecken die Ozeane?","ca. 71 %",["ca. 51 %","ca. 85 %","ca. 93 %"],"Die Ozeane bedecken etwa 71 % und sind der größte zusammenhängende Lebensraum."],
+["Welche Organismen produzieren im Meer den meisten Sauerstoff?","Phytoplankton",["Zooplankton","Nekton","Muscheln"],"Phytoplankton betreibt Photosynthese und ist die marine Primärproduktion."],
+["Was transportiert der Golfstrom?","Warmes Wasser aus den Tropen Richtung Norden",["Kaltes Wasser Richtung Süden","Salzwasser in die Tiefsee","Nährstoffe vom Meeresboden"],"Er beeinflusst dadurch das Klima im Nordatlantik und in Europa."],
+["Welche Kraft beeinflusst die Richtung der Meeresströmungen?","Corioliskraft",["Zentripetalkraft","Reibungskraft","Magnetkraft"],"Dazu kommen Wind sowie Temperatur und Salzgehalt (Dichte)."],
+["Bei welcher Temperatur hat Wasser die höchste Dichte?","4 °C",["0 °C","10 °C","-4 °C"],"Wasser mit 4 °C sinkt ab; unter 4 °C bleibt es oben, bei 0 °C gefriert die Oberfläche."],
+["Wie heißt die Sprungschicht bei der Sommerstagnation?","Metalimnion",["Epilimnion","Hypolimnion","Benthal"],"Epilimnion = warm oben, Metalimnion = starker Temperaturabfall, Hypolimnion = kalt unten."],
+["Wie heißt die kalte Tiefwasserschicht im See?","Hypolimnion",["Epilimnion","Metalimnion","Pelagial"],"Hypo = unten."],
+["Was ist eine Folge der Sommerstagnation?","O2 gelangt nur begrenzt in tiefere Schichten",["Der See wird komplett durchmischt","Die Oberfläche gefriert","Nährstoffe steigen auf"],"Die stabile Schichtung verhindert Austausch; Nährstoffe reichern sich unten an."],
+["Was passiert bei der Frühjahrszirkulation?","Sauerstoff gelangt in die Tiefe, Nährstoffe nach oben",["Nur die Oberfläche erwärmt sich","Es bildet sich eine stabile Schichtung","Das Wasser gefriert"],"Gleiche Temperatur/Dichte im See: Wind kann das Wasser durchmischen."],
+["Wie nennt man Organismen, die aktiv schwimmen (Fische, Wale)?","Nekton",["Plankton","Neuston","Benthos"],"Plankton treibt, Neuston lebt an der Oberfläche."],
+["Wie nennt man Organismen, die überwiegend mit der Strömung treiben?","Plankton",["Nekton","Neuston","Benthos"],"Plankton = Drifter."],
+["Wie heißt der Meeresboden als Lebensraum?","Benthal",["Pelagial","Supralitoral","Bathyal"],"Dort leben Muscheln, Würmer, Krebse, Stachelhäuter."],
+["Wie heißt der offene Ozean (freie Wassersäule)?","Pelagial",["Benthal","Litoral","Phytal"],"Pelagial = freie Wassersäule."],
+["Was ist Chemosynthese?","Energiegewinnung aus chemischen Reaktionen, z. B. bei hydrothermalen Quellen",["Photosynthese in der Tiefsee","Abbau von Algen","Filtrieren von Plankton"],"Bestimmte Bakterien nutzen chemische Energie unabhängig vom Sonnenlicht."],
+["Welcher Faktor ist für die Steinkoralle biotisch?","Symbiose mit Algen",["Salzgehalt","Lichtintensität","Wasserdruck"],"Biotisch = Lebewesen (Plankton als Nahrung, Symbiose). Die anderen sind abiotisch."],
+["In welchem Temperaturbereich gedeihen Korallenriffe?","20 bis 30 °C",["5 bis 10 °C","10 bis 20 °C","30 bis 40 °C"],"Dazu: konstantes Licht, konstanter Salz- und Mineralgehalt, sauberes Wasser."],
+["Was färbt die Felsenküste grau bis braunschwarz?","Endolithische Cyanobakterien",["Kalkrotalgen","Braunalgen","Schwämme"],"Sie bohren im Gestein und können Luftstickstoff (N2) nutzen."],
+["Wo liegt das Supralitoral?","Über der Hochwasserlinie im Spritzwasserbereich",["Unter der Niedrigwasserlinie","In der Tiefsee","Im Seegras"],"Dort herrscht extremer Wechsel: Hitze/Kälte, trocken/nass, Süß-/Salzwasser."],
+["Was sind Bioherme?","Kalkige Riffstrukturen biogenen Ursprungs",["Höhlentypen","Algenarten","Strömungen"],"Durch Übereinanderwachsen kalkiger Organismen; nur die oberen cm sind belebt."],
+["Wer bildet den Hauptteil der Kalkmasse in Biohermen?","Kalkrotalgen",["Schwämme","Moostierchen","Seegräser"],"Corallinaceae; das Jahreswachstum beträgt nur wenige mm."],
+["Was bedeutet Verkarstung?","Korrosion von Kalkgestein, v. a. durch Kohlensäure",["Ablagerung von Sand","Wachstum von Korallen","Bildung von Vulkangestein"],"Typisch für die kroatische Adriaküste (Karbonatgestein)."],
+["Was bezeichnet der Kompensationshorizont?","Tiefe mit ca. 1 % der photosynthetisch aktiven Strahlung",["Die tiefste Stelle des Meeres","Die Grenze zum Meeresboden","Die Wasseroberfläche"],"Darüber euphotische Zone (positive Energiebilanz), darunter dysphotische Zone."],
+["Welche Lichtfarbe dringt am tiefsten ins Wasser?","Blau",["Rot","Gelb","Grün"],"Rot wird stark absorbiert, Blau nicht so stark."],
+["Welche Algen findet man im Infralitoral (Starklichtzone)?","Braunalgen, Grünalgen, Seegräser",["Nur Rotalgen","Nur Kieselalgen","Keine Algen"],"Im Mittelmeer je nach Klarheit ca. 15 bis 50 m."],
+["Welche Algen leben im Circalitoral (Schwachlichtzone)?","Rotalgen",["Grünalgen","Braunalgen","Seegräser"],"Bis zum Kompensationshorizont; im Bathyal nur noch einzellige Kieselalgen."],
+["Was sind Seegräser?","Gefäßpflanzen mit Wurzeln und Rhizomen",["Braunalgen","Einzellige Algen","Moose"],"Sie stammen von Landpflanzen ab."],
+["Wie ernährt sich ein Schwamm?","Filtrierend, strudelt Plankton mit Geißeln herbei",["Photosynthese","Fängt Beute mit Nesselzellen","Schleimnetz für abgestorbene Organismen"],"Aktiver Suspensionsfresser, Feinpartikel."],
+["Womit fängt die Steinkoralle Plankton?","Nesselzellen",["Schleimnetz","Geißeln","Cilien"],"Passiver Suspensionsfresser (grob); zusätzlich Photosynthese durch Symbiose."],
+["Welche Zelle gehört zur spezifischen (erworbenen) Abwehr?","B-Zelle",["Makrophage","Neutrophiler Granulozyt","Natürliche Killerzelle"],"T- und B-Zellen sind adaptiv; die anderen gehören zum angeborenen System."],
+["Welche Zellen bilden die Antikörper?","Plasmazellen (aus B-Zellen)",["Makrophagen","Neutrophile","Killerzellen"],"Antikörper binden Antigene und verklumpen Erreger."],
+["Welche Aufgabe hat die T-Helferzelle?","Sie koordiniert die Immunantwort und aktiviert Killer- und Plasmazellen",["Sie frisst Erreger","Sie bildet Antikörper","Sie bildet Zytokine im Knochenmark"],"Makrophagen präsentieren ihr das Antigen."],
+["Was machen Killerzellen?","Sie zerstören infizierte Wirtszellen",["Sie bilden Antikörper","Sie präsentieren Antigene","Sie transportieren Sauerstoff"],"So werden keine weiteren Viren freigesetzt."],
+["Wie lange leben Neutrophile ungefähr?","ca. 3 Tage",["ca. 3 Stunden","ca. 3 Wochen","ca. 3 Jahre"],"Laut Video-Notizen."],
+["Warum schützt die aktive Immunisierung lange?","Es entstehen Gedächtniszellen",["Fertige Antikörper werden gespritzt","Antikörper werden nie abgebaut","Erreger bleiben im Körper"],"Gedächtniszellen erkennen den Erreger sofort und bilden schnell viele Antikörper."],
+["Welche Aussage zur passiven Immunisierung stimmt?","Schutz sofort, aber nur wenige Wochen",["Schutz erst nach Wochen, dafür lebenslang","Es bilden sich Gedächtniszellen","Der Körper bildet selbst Antikörper"],"Fertige Antikörper (z. B. aus Tierserum) werden abgebaut; keine Gedächtniszellen."],
+["Ist die Grippeschutzimpfung aktiv oder passiv?","Aktiv",["Passiv","Beides","Weder noch"],"Schutzimpfung = aktiv (abgeschwächte/abgetötete Erreger oder Bruchstücke)."],
+["Warum muss man sich jährlich gegen Grippe impfen lassen?","Grippeviren mutieren",["Antikörper halten nur 1 Tag","Der Impfstoff verdirbt","Bakterien verändern sich"],"Der Impfstoff wird jedes Jahr angepasst."],
+["Welche Impfung ist ein Beispiel für eine passive Immunisierung?","Tollwut-/Tetanus-Heilimpfung im Notfall",["Masern-Impfung","FSME-Impfung","Polio-Impfung"],"Heilimpfung = fertige Antikörper bei akuter Infektion."],
+["Was ist eine Allergie?","Überreaktion des Immunsystems",["Angriff auf den eigenen Körper","Schwaches Immunsystem","Virusinfektion"],"Angriff auf den eigenen Körper = Autoimmunerkrankung."],
+["Was ist eine Autoimmunerkrankung?","Das Immunsystem arbeitet gegen den eigenen Körper",["Überreaktion auf Pollen","Fehlende Antikörper","Infektion mit Bakterien"],"Im Gegensatz zur Allergie richtet sich die Abwehr gegen Körpereigenes."]
+];
+const BANK=RAW.map(([q,r,w,why],i)=>{const o=[...w];o.splice(i%4,0,r);return{q,options:o,correct:i%4,why}});
+const SUM=`<h3>Meeresbiologie</h3><ul><li>Biologie der Meereslebewesen und ihrer Umwelt; Teilgebiete: Ökologie, Zoologie, Botanik/Phykologie, Mikrobiologie, Evolution/Genetik, Physiologie.</li><li>Ozeane: <b>71 %</b> der Erdoberfläche, größter Lebensraum.</li><li>Funktionen: <b>Klimaregulation</b> (Wärme- und CO2-Speicher), <b>Sauerstoff</b> durch Phytoplankton, Stoffkreisläufe (C, O, P), Biodiversität.</li></ul><h3>Golfstrom und Strömungen</h3><ul><li>Warme Strömung im Atlantik: Tropen → Norden, wärmt Nordatlantik und Europa; Teil der atlantischen meridionalen Umwälzzirkulation.</li><li>Einflüsse: <b>Wind</b>, <b>Corioliskraft</b> (Richtung), <b>Temperatur und Salzgehalt</b> (Dichte). Dichteres Wasser sinkt ab → Tiefenströmungen.</li></ul><h3>Jahreszeiten im See</h3><ul><li><b>Sommer:</b> warmes Wasser oben, stabile Schichtung: Epilimnion (warm) – Metalimnion (Sprungschicht) – Hypolimnion (kalt). Wenig O2 in der Tiefe, Nährstoffe sammeln sich unten.</li><li><b>Winter:</b> Dichtemaximum bei <b>4 °C</b> (sinkt ab); unter 4 °C bleibt Wasser oben, unter 0 °C Eis.</li><li><b>Frühjahr/Herbst:</b> Vollzirkulation → O2 in die Tiefe, Nährstoffe nach oben.</li></ul><h3>Lebensräume</h3><ul><li><b>Küstenzone:</b> sehr produktiv (Mangroven, Seegras, Watt, Fels-/Sandküste, Korallenriffe).</li><li><b>Pelagial</b> (freie Wassersäule): Plankton (treibt), Nekton (schwimmt aktiv), Neuston (Oberfläche).</li><li><b>Benthal</b> (Boden): Muscheln, Würmer, Krebse, Stachelhäuter. Tiefer = weniger Licht und Wärme, mehr Druck.</li></ul><h3>Nahrung und Energie</h3><ul><li>Phytoplankton → Zooplankton → kleiner Fisch → Raubfisch → Meeressäuger; real eher <b>Nahrungsnetze</b>.</li><li>Energie meist aus Sonne (Photosynthese); in der Tiefsee <b>Chemosynthese</b> (Bakterien an hydrothermalen Quellen).</li></ul><h3>Biotisch / abiotisch</h3><ul><li>Biotisch: Lebewesen (Fressfeinde, Symbiose, Nahrung). Abiotisch: Temperatur, Licht, Salzgehalt, Druck, O2, Strömung, Nährstoffe.</li><li>Korallenriffe: 20–30 °C, konstantes Licht, konstanter Salzgehalt, sauberes Wasser.</li></ul><h3>Lebensräume der Adria</h3><ul><li><b>Felsenküste</b> (Supralitoral): extrem, graue Färbung durch endolithische Cyanobakterien (nutzen N2).</li><li><b>Blockgrund:</b> bewachsene Blöcke, verkittet durch Schwämme, Kalkröhrenwürmer, Moostierchen, Kalkrotalgen → Lückensystem mit hoher Vielfalt.</li><li><b>Höhlen/Schatten:</b> Schwämme, Moostierchen, Kalkröhrenwürmer → <b>Bioherme</b> (Kalkrotalgen = Hauptmasse, Wachstum nur mm/Jahr).</li><li><b>Meereshöhlen:</b> Karst (Kohlensäure löst Kalk), Untertauchküste; Typen: Grotte, Durchgang, Sackhöhle, Tunnel, Randhöhle.</li></ul><h3>Licht und Zonierung</h3><ul><li>Rot wird stark absorbiert, Blau dringt am tiefsten. <b>Kompensationshorizont</b> bei ca. 1 % der Strahlung; darüber euphotisch, darunter dysphotisch.</li><li><b>Infralitoral</b> (Starklicht, 15–50 m): Braun-, Grünalgen, Seegräser. <b>Circalitoral</b> (Schwachlicht): Rotalgen. <b>Bathyal:</b> nur Kieselalgen.</li></ul><h3>Ernährungstypen</h3><ul><li>Alge: Produzent. Kalkröhrenwurm: filtriert mit Cilien (aktiv, fein). Steinkoralle: Photosynthese + Nesselzellen (passiv, grob). Wurmschnecke: Schleimnetz (passiv, grob, Destruent). Schwamm: Geißeln (aktiv, fein).</li><li>Seegras: Gefäßpflanze mit Rhizomen; Seegrasphytal = Versteck und Nahrung, viele Fische wachsen hier auf.</li></ul><h3>Immunsystem</h3><ul><li><b>Organe:</b> Schleimhäute, Mandeln, Thymus, Knochenmark, Lymphknoten, Haut, Milz, Darm.</li><li><b>Angeboren (unspezifisch):</b> Makrophagen, dendritische Zellen, neutrophile Granulozyten (ca. 3 Tage), NK-Zellen, Zytokine, Entzündung; schnell, Phagozytose.</li><li><b>Erworben (spezifisch):</b> T-Zellen und B-Zellen; B-Zellen/Plasmazellen bilden <b>Antikörper</b>; <b>Gedächtniszellen</b> → schnellere Reaktion bei erneutem Kontakt.</li><li><b>Ablauf:</b> Makrophage frisst Erreger, präsentiert Antigen → T-Helferzelle aktiviert Killerzellen (zerstören infizierte Zellen) und Plasmazellen (Antikörper verklumpen Erreger) → Fresszellen räumen auf → Gedächtnis.</li></ul><h3>Impfung</h3><ul><li>Impfantigen: <b>ungefährlich</b> (abgeschwächt/abgetötet/Bruchstücke) und <b>erkennbar</b> (gleiche Oberflächenmerkmale wie der Erreger).</li><li><b>Aktiv</b> (Schutzimpfung): Körper bildet selbst AK + Gedächtniszellen; Schutz verzögert, aber jahrelang bis lebenslang (Masern, Tetanus, FSME, Polio).</li><li><b>Passiv</b> (Heilimpfung): fertige AK (z. B. aus Tierserum); Schutz sofort, aber nur Wochen, keine Gedächtniszellen (Notfall: Tollwut, Tetanus).</li><li>Grippeimpfung: aktiv, jährlich, weil Viren <b>mutieren</b>; Risikogruppen (Ältere, Schwangere) sollen impfen. Trotz Impfung erkältet = Impfreaktion oder anderer Infekt.</li><li><b>Allergie:</b> Überreaktion. <b>Autoimmunerkrankung:</b> Abwehr gegen den eigenen Körper.</li></ul>`;
+const CARDS=[
+["Was ist Meeresbiologie?","Teilgebiet der Biologie über Meereslebewesen und ihre Wechselwirkungen mit der marinen Umwelt."],
+["Teilgebiete der Meeresbiologie?","Ökologie, Zoologie, Botanik/Phykologie, Mikrobiologie, Evolution/Genetik, Physiologie."],
+["Phykologie?","Untersuchung von Algen und anderen photosynthetisch aktiven Organismen."],
+["Wie viel der Erdoberfläche bedecken die Ozeane?","Etwa 71 %, größter zusammenhängender Lebensraum."],
+["Wichtige Funktionen der Meere?","Klimaregulation, Sauerstoffproduktion, Stoffkreisläufe, Lebensraum/Biodiversität, Wärmehaushalt."],
+["Wie regulieren Ozeane das Klima?","Speichern viel Wärme und einen großen Teil des vom Menschen produzierten CO₂."],
+["Wer produziert den Sauerstoff im Meer?","Phytoplankton und andere photosynthetisch aktive Organismen (marine Primärproduktion)."],
+["Was ist der Golfstrom?","Warme Meeresströmung im Atlantik: Tropen → Norden, wärmt Nordatlantik und Europa."],
+["Wie heißt das große Strömungssystem des Atlantiks?","Atlantische meridionale Umwälzzirkulation."],
+["Was beeinflusst die Zirkulation des Atlantiks?","Wind, Corioliskraft (Richtung), Temperatur und Salzgehalt (Dichte)."],
+["Was passiert mit dichterem Wasser?","Es sinkt ab und bildet Tiefenströmungen."],
+["Sommerstagnation: Was passiert?","Sonne erwärmt die Oberfläche, warmes Wasser (geringere Dichte) bleibt oben: stabile Schichtung."],
+["Die drei Schichten im See im Sommer?","Epilimnion (warm, oben), Metalimnion (Sprungschicht, starker Temperaturabfall), Hypolimnion (kalt, unten)."],
+["Folgen der Sommerstagnation?","O₂ gelangt nur begrenzt in die Tiefe, Nährstoffe reichern sich unten an, Lebensbedingungen unterscheiden sich je Schicht."],
+["Winterstagnation: Was passiert?","Oberfläche kühlt ab. Wasser mit 4 °C hat die höchste Dichte und sinkt. Unter 4 °C bleibt Wasser oben, bei 0 °C gefriert die Oberfläche."],
+["Bei welcher Temperatur hat Wasser die höchste Dichte?","Bei 4 °C."],
+["Frühjahrszirkulation?","Wasser erwärmt sich, gleiche Temperatur/Dichte im See → Wind durchmischt. Sauerstoff in die Tiefe, Nährstoffe nach oben."],
+["Herbstzirkulation?","Oberfläche kühlt ab, wird dichter, sinkt → vollständige Durchmischung. Austausch von Sauerstoff und Nährstoffen."],
+["Wovon hängen Lebensbedingungen im Meer ab?","Tiefe, Licht, Temperatur, Salzgehalt, Druck, Nährstoffangebot."],
+["Küstenzone: Beispiele?","Mangroven, Seegraswiesen, Wattgebiete, Fels-/Sandküsten, Korallenriffe: biologisch sehr produktiv."],
+["Pelagial?","Der offene Ozean (freie Wassersäule)."],
+["Plankton, Nekton, Neuston?","Plankton: treibt mit Wasserbewegung. Nekton: schwimmt aktiv (Fische, Wale, Oktopoden). Neuston: lebt an/unter der Oberfläche."],
+["Benthal?","Der Meeresboden: Muscheln, Würmer, Krebse, Stachelhäuter."],
+["Was ändert sich mit zunehmender Tiefe?","Licht und Temperatur nehmen ab, der Wasserdruck nimmt stark zu."],
+["Beispiel einer marinen Nahrungskette?","Phytoplankton → Zooplankton → kleiner Fisch → Raubfisch → Meeressäuger."],
+["Nahrungsnetz statt Nahrungskette: Warum?","Marine Ökosysteme sind viel komplexer, viele Verflechtungen."],
+["Woher stammt die Energie meist?","Aus Sonnenenergie (Photosynthese → chemische Energie)."],
+["Chemosynthese?","Energiegewinnung aus chemischen Reaktionen (Bakterien an hydrothermalen Quellen in der Tiefsee), unabhängig vom Licht."],
+["Biotische vs. abiotische Faktoren?","Biotisch: Lebewesen (Fressfeinde, Symbiose, Nahrung). Abiotisch: Temperatur, Licht, Salzgehalt, Druck, O₂, Strömung, Nährstoffe."],
+["Löwenzahn: biotisch/abiotisch?","Biotisch: Fressfeinde, Pilzbefall. Abiotisch: Luftdruck, Temperatur, Relief, Niederschlag, Boden."],
+["Steinkoralle: biotisch/abiotisch?","Biotisch: Plankton (Nahrung), Symbiose mit Algen. Abiotisch: Druck, Licht, Salzgehalt, O₂, Strömung, Nährstoffe, Mineralien."],
+["Bedingungen für Korallenriffe?","20 bis 30 °C (bis ca. 30. Breitengrad), konstantes Licht, konstanter Salz-/Mineralgehalt, sauberes Wasser."],
+["Felsenküste (Supralitoral)?","Felsiger Strand über der Hochwasserlinie im Spritzwasserbereich, wüstenartig, extreme Wechsel, nur wenige Lebewesen."],
+["Was färbt die Felsenküste grau-braunschwarz?","Endolithische Cyanobakterien, sie bohren im Gestein und nutzen Luftstickstoff (N₂)."],
+["Blockgrund?","Gesteinsblöcke, lange liegend, kantig, stark bewachsen; Aufwuchs (Schwämme, Kalkröhrenwürmer, Moostierchen, Kalkrotalgen) verkittet sie → Lückensystem mit hoher Vielfalt."],
+["Höhlen und Schattenbereich: Lebewesen?","Schwämme (Porifera), Moostierchen (Bryozoa), Kalkröhrenwürmer (Polychaeta), Wurmschnecken (Gastropoda)."],
+["Bioherme?","Kalkige Riffstrukturen biogenen Ursprungs durch Übereinanderwachsen; nur die oberen cm sind belebt, Wachstum wenige mm/Jahr."],
+["Wer bildet den Hauptteil der Kalkmasse in Biohermen?","Kalkrotalgen (Corallinaceae)."],
+["Karst und Verkarstung?","Kohlensäure löst Karbonatgestein (Korrosion), begünstigt durch Tektonik, Niederschlag, Klima. Typisch für die kroatische Adriaküste."],
+["Untertauchküste?","Küste, bei der Höhlensysteme im Meer versunken sind (Adria). Auch Wellen tragen zur Aushöhlung bei."],
+["Höhlentypen?","Grotte, Durchgang, Sackhöhle (mit Luftkuppel), Tunnel, Randhöhle."],
+["Welche Lichtfarbe dringt am tiefsten ein?","Blau (Rot wird stark absorbiert)."],
+["Kompensationshorizont?","Tiefe bei ca. 1 % der photosynthetisch aktiven Strahlung."],
+["Euphotische und dysphotische Zone?","Euphotisch: oberhalb des Kompensationshorizonts, positive Energiebilanz. Dysphotisch: darunter, Licht reicht nicht mehr."],
+["Infralitoral?","Starklichtzone, im Mittelmeer 15 bis 50 m: Braunalgen, Grünalgen, Seegräser."],
+["Circalitoral?","Schwachlichtzone bis zum Kompensationshorizont: Rotalgen."],
+["Bathyal?","Nur noch einzellige Kieselalgen."],
+["Ernährung der Alge?","Photosynthese: Produzent."],
+["Ernährung des Kalkröhrenwurms?","Filtrieren, strudelt mit Cilien Nahrung herbei: Konsument/Destruent, aktiv, Feinpartikel."],
+["Ernährung der Steinkoralle?","Photosynthese + Filtrieren (Nesselzellen fangen Plankton): Produzent/Konsument, passiv, grob."],
+["Ernährung der Wurmschnecke?","Filtrieren mit Schleimnetz (v. a. abgestorbene Organismen): Destruent, passiv, grob."],
+["Ernährung des Schwamms?","Filtrieren, strudelt mit Geißeln Plankton herbei: Konsument/Destruent, aktiv, fein."],
+["Seegräser?","Gefäßpflanzen mit Wurzeln und Rhizomen (stammen von Landpflanzen ab); zweitgrößte Pflanzengruppe des Meeres (mit Algen)."],
+["Seegrasphytal: Bedeutung?","Hochdiverses Biotop: Verstecke und Nahrung, viele Fische wachsen dort auf."],
+["Gefährdung der Meere (Überschriften)?","Die Meere sind zu warm, zu hoch, zu sauer, zu leer, zu verschmutzt."],
+["Zentrale Organe des Immunsystems?","Schleimhäute, Mandeln, Thymusdrüse, Knochenmark, Lymphknoten, Haut, Milz, Darm."],
+["Angeborenes (unspezifisches) Immunsystem?","Makrophagen, dendritische Zellen, neutrophile Granulozyten, NK-Zellen, Zytokine, Komplementsystem: schnell, Phagozytose, Entzündung."],
+["Erworbenes (spezifisches) Immunsystem?","T-Zellen, B-Zellen, Plasmazellen, Antikörper: spezifisch gegen bestimmte Erreger, mit Gedächtnis."],
+["Was machen Makrophagen?","Fresszellen (Phagozytose), präsentieren Antigene und aktivieren die T-Helferzelle."],
+["Neutrophile Granulozyten?","Schnelle Reaktion, Phagozytose und Abtötung von Erregern, Lebensdauer ca. 3 Tage."],
+["Was sind natürliche Killerzellen?","Bekämpfen Krankheitserreger unspezifisch (angeborenes System)."],
+["T-Helferzelle?","Koordiniert den Gegenschlag, aktiviert Killerzellen und Plasmazellen."],
+["Killerzellen (T-Zellen)?","Zerstören infizierte Wirtszellen, damit nicht noch mehr Viren freigesetzt werden."],
+["B-Zellen und Plasmazellen?","B-Zellen bilden Plasmazellen, die Millionen maßgeschneiderter Antikörper herstellen."],
+["Was machen Antikörper?","Binden an spezifische Antigene, markieren Erreger und verklumpen sie."],
+["Gedächtniszellen?","T- und B-Gedächtniszellen: schnellere, effizientere Reaktion bei erneutem Kontakt, Schutz über Jahre."],
+["Ablauf der Immunabwehr (Action Story)?","Makrophage frisst Erreger → präsentiert Antigen → T-Helferzelle aktiviert Killer- und Plasmazellen → Antikörper verklumpen Erreger → Fresszellen räumen auf → Gedächtnis."],
+["Was entsteht bei einer Entzündung?","Viel Flüssigkeit, Immunzellen werden mobilisiert (Zytokine)."],
+["Zwei Bedingungen für ein Impf-Antigen?","1. Ungefährlich (abgeschwächt/abgetötet/Bruchstücke wie Oberflächenproteine). 2. Vom Immunsystem erkennbar (gleiche Oberflächenmerkmale wie der Erreger)."],
+["Aktive Immunisierung: Wirkung?","Körper bildet selbst Antikörper und Gedächtniszellen (Schutzimpfung)."],
+["Aktive Immunisierung: Dauer und Beginn?","Langfristig (Jahre bis lebenslang), Schutz verzögert (nach einigen Wochen)."],
+["Aktive Immunisierung: Beispiele?","Masern, Tetanus, FSME, Corona, Polio, Grippe."],
+["Passive Immunisierung: Wirkung?","Fertige Antikörper werden verabreicht (Heilimpfung), z. B. aus Tierserum."],
+["Passive Immunisierung: Dauer und Beginn?","Kurzfristig (AK werden abgebaut, keine Gedächtniszellen), Schutz sofort."],
+["Passive Immunisierung: Beispiele?","Akute Notfälle: Tetanus, Tollwut."],
+["Warum schützt die aktive Immunisierung lange?","Es entstehen Gedächtniszellen, die den Erreger sofort erkennen und schnell viele Antikörper bilden."],
+["Warum muss man sich jährlich gegen Grippe impfen?","Grippeviren mutieren, der Impfstoff wird jedes Jahr angepasst."],
+["Trotz Grippeimpfung erkältet?","Impfreaktion oder ein anderer Infekt (Erkältungsviren sind nicht von der Grippeimpfung abgedeckt)."],
+["Grippeimpfung für Ältere und Schwangere?","Empfohlen, weil das Immunsystem anfälliger ist."],
+["Allergie?","Überreaktion des Immunsystems."],
+["Autoimmunerkrankung?","Das Immunsystem arbeitet gegen den eigenen Körper."]
+];
+S.seeded=S.seeded||[];
+S.subs.forEach(s=>{if(SEED[s.name]&&!s.text){s.text=SEED[s.name];if(!S.seeded.includes(s.name))S.seeded.push(s.name)}});
+if(S.cv!==2){sub0().cards=shuf(CARDS.map(x=>({q:x[0],a:x[1]})));S.cv=2;try{localStorage.setItem("lernapp_bio",JSON.stringify(S))}catch(e){}}
+if(!S.qv2){sub0().quiz=shuf(BANK);S.qv2=1;try{localStorage.setItem("lernapp_bio",JSON.stringify(S))}catch(e){}}
+try{localStorage.setItem("lernapp_bio",JSON.stringify(S))}catch(e){}
+let cur=0,tab="sum",sample=null,busy=false,ci=0,flipped=false,qi=0,score=0,picked=null;
+let deck=null,cardKnown=[],cardWrong=[];
+const $=id=>document.getElementById(id);
+const save=()=>{try{localStorage.setItem("lernapp_bio",JSON.stringify(S))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+claude.use("sample").then(s=>{sample=s;render()}).catch(()=>{});
+const sub=()=>S.subs[cur];
+
+async function ask(prompt,json){
+  if(!sample)throw {message:"Claude ist hier nicht verfügbar."};
+  return json?await sample.json(prompt):(await sample(prompt)).text;
+}
+const ctx=()=>`Fach: ${sub().name}. Zielgruppe: 18-jähriger Schüler in Österreich (Oberstufe).`;
+
+function render(){
+  $("subj").innerHTML=S.subs.map((s,i)=>`<button class="${i==cur?'on':''}" data-s="${i}">${esc(s.name)}</button>`).join("")+`<button data-ren="1" title="Umbenennen">✏️</button>`;
+  $("tabs").innerHTML=TABS.map(([k,l])=>`<button class="${k==tab?'on':''}" data-t="${k}">${l}</button>`).join("");
+  const p=$("pane"),s=sub();
+  if(tab=="sum"){
+    p.innerHTML=`<div class="mu">Für die 1-Stunden-Schularbeit. Markiere etwas und tippe „Erklären“.</div><div class="card" id="view" style="white-space:normal">${SUM}</div>`;
+  }else if(tab=="mat"){
+    p.innerHTML=`<div class="card"><div class="mu">Text deiner Datei hier einfügen (aus Word/PDF kopieren) oder .txt/.md laden.</div>
+    <textarea id="ta" placeholder="Material für ${esc(s.name)}…">${esc(s.text)}</textarea>
+    <div class="row" style="margin-top:8px"><label class="btn">📄 Datei laden<input type="file" id="fi" accept=".txt,.md,.csv,text/*" class="hide"></label>
+    <button id="read">📖 Lesen &amp; Wörter erklären</button></div></div>
+    <div id="rd"></div>`;
+    $("ta").oninput=e=>{s.text=e.target.value;save()};
+    $("fi").onchange=async e=>{const f=e.target.files[0];if(f){s.text=await f.text();save();render()}};
+    $("read").onclick=()=>{tab="read";render()};
+  }else if(tab=="read"){
+    p.innerHTML=`<div class="mu">Markiere ein Wort oder einen Satz, dann tippe „Erklären“.</div><div class="card" id="view">${esc(s.text)||"Noch kein Material."}</div><button data-t="mat">← Zurück</button>`;
+  }else if(tab=="cards"){
+    const c=deck||s.cards;
+    let h=`<div class="row"><button id="cb">📚 Alle Karten</button><button id="cs">🔀 Mischen</button><button id="gen" ${busy?'disabled':''}>${busy?'Erstelle…':'✨ Mehr (KI)'}</button></div>`;
+    if(!c.length)h+=`<p class="mu">Noch keine Karten.</p>`;
+    else if(ci>=c.length)h+=`<div class="card"><b>Durchgang fertig: ${cardKnown.length} von ${c.length} gewusst</b></div><div class="row">${cardWrong.length?`<button class="pri" id="cr">🔁 Nicht gewusste wiederholen (${cardWrong.length})</button>`:""}<button id="cb2">🔄 Von vorn</button></div>`;
+    else h+=`<div class="mu" style="margin-top:8px">Karte ${ci+1} von ${c.length} · ✅ ${cardKnown.length} · ❌ ${cardWrong.length}</div><div class="card flip" id="fl"><div><div class="mu" style="margin-bottom:6px">${flipped?"Antwort":"Frage"}</div>${esc(flipped?c[ci].a:c[ci].q)}</div></div>`+(flipped?`<div class="row"><button class="pri" id="ck">✅ Gewusst</button><button id="cw">❌ Nicht gewusst</button></div>`:`<div class="mu" style="text-align:center">Tippe die Karte zum Umdrehen</div>`)+`<div class="row" style="margin-top:8px"><button id="pv">←</button><button id="nx">→</button></div>`;
+    p.innerHTML=h;
+    const reset=()=>{deck=null;ci=0;flipped=false;cardKnown=[];cardWrong=[];render()};
+    $("cb").onclick=reset;$("gen").onclick=()=>gen("cards");
+    $("cs").onclick=()=>{s.cards=shuf(s.cards);save();reset()};
+    if($("cb2"))$("cb2").onclick=reset;
+    if($("cr"))$("cr").onclick=()=>{deck=cardWrong.map(i=>c[i]);cardKnown=[];cardWrong=[];ci=0;flipped=false;render()};
+    if($("fl"))$("fl").onclick=()=>{flipped=!flipped;render()};
+    if($("ck"))$("ck").onclick=()=>{cardKnown.push(ci);ci++;flipped=false;render()};
+    if($("cw"))$("cw").onclick=()=>{cardWrong.push(ci);ci++;flipped=false;render()};
+    if($("pv"))$("pv").onclick=()=>{ci=(ci+c.length-1)%c.length;flipped=false;render()};
+    if($("nx"))$("nx").onclick=()=>{ci=(ci+1)%c.length;flipped=false;render()};
+  }else if(tab=="quiz"){
+    const q=s.quiz;
+    let h=`<div class="row"><button class="pri" id="gen" ${busy?'disabled':''}>${busy?'Erstelle…':'✨ Quiz aus Material erstellen'}</button></div>`;
+    if(q.length){
+      if(qi>=q.length)h+=`<div class="card"><b>Fertig: ${score}/${q.length} richtig</b><div class="row" style="margin-top:8px"><button id="rs">Nochmal</button></div></div>`;
+      else{const x=q[qi];h+=`<div class="card"><div class="mu">Frage ${qi+1}/${q.length}</div><p><b>${esc(x.q)}</b></p>`+
+        x.options.map((o,i)=>`<button class="opt ${picked!=null?(i==x.correct?'ok':i==picked?'no':''):''}" data-o="${i}" ${picked!=null?'disabled':''}>${esc(o)}</button>`).join("")+
+        (picked!=null?`<p class="mu">${esc(x.why||"")}</p><div class="row"><button class="pri" id="nq">Weiter</button><button data-ex="${esc(x.q)}">💡 Erklären</button></div>`:"")+`</div>`}
+    }else h+=`<p class="mu">Noch kein Quiz.</p>`;
+    p.innerHTML=h;const bb=document.createElement("button");bb.textContent="🔀 Prüfungsfragen (gemischt)";bb.onclick=()=>{sub().quiz=shuf(BANK);qi=0;score=0;picked=null;save();render()};p.firstChild.appendChild(bb);$("gen").onclick=()=>gen("quiz");
+    if($("rs"))$("rs").onclick=()=>{qi=0;score=0;picked=null;render()};
+    if($("nq"))$("nq").onclick=()=>{qi++;picked=null;render()};
+  }else if(tab=="wiki"){
+    const keys=Object.keys(S.wiki).sort();
+    p.innerHTML=`<div class="row" style="flex-wrap:nowrap"><input type="text" id="wq" placeholder="Begriff suchen, z. B. Ionenbindung"><button class="pri" id="wg">Suchen</button></div>
+    <div class="card mu">Erklärungen kommen von Claude (kein echtes Wikipedia). Verlinkte Begriffe kannst du antippen.</div>
+    <div class="row">${keys.map(k=>`<button data-w="${esc(k)}">${esc(k)}</button>`).join("")}</div>`;
+    const go=()=>{const v=$("wq").value.trim();if(v)explain(v)};
+    $("wg").onclick=go;$("wq").onkeydown=e=>{if(e.key=="Enter")go()};
+  }
+}
+
+async function gen(kind){
+  const s=sub();
+  if(!s.text.trim()){alert("Füge zuerst Material ein.");return}
+  busy=true;render();
+  try{
+    const src=s.text.slice(0,14000);
+    if(kind=="cards"){
+      s.cards=s.cards.concat(await ask(`${ctx()}\nErstelle 15 Lernkarten auf Deutsch aus diesem Material. Antworte NUR mit JSON: [{"q":"Frage","a":"kurze Antwort"}].\n\nMaterial:\n${src}`,true));deck=null;ci=0;flipped=false;
+    }else{
+      s.quiz=await ask(`${ctx()}\nErstelle 10 Multiple-Choice-Fragen auf Deutsch (schularbeitsnah) aus diesem Material. Antworte NUR mit JSON: [{"q":"","options":["","","",""],"correct":0,"why":"kurze Begründung"}] (correct = Index).\n\nMaterial:\n${src}`,true);qi=0;score=0;picked=null;
+    }
+    save();
+  }catch(e){alert(e.message||"Fehler")}
+  busy=false;render();
+}
+
+async function explain(term,context){
+  const sh=$("sheet");sh.style.display="block";
+  sh.innerHTML=`<h3>${esc(term)}</h3><p class="mu">Claude erklärt…</p>`;
+  try{
+    const key=term.toLowerCase();
+    let t=S.wiki[term]||S.wiki[key];
+    if(!t){
+      t=await ask(`${ctx()}\nErkläre „${term}“ wie ein kurzer Lexikoneintrag: einfach, präzise, max. 130 Wörter, Deutsch, mit einem Beispiel. Setze 2–4 verwandte Fachbegriffe in doppelte eckige Klammern, z. B. [[Elektron]]. Kein Markdown.${context?"\nKontext aus dem Material: "+context.slice(0,400):""}`);
+      S.wiki[term]=t;save();
+    }
+    const body=esc(t).replace(/\[\[(.+?)\]\]/g,(m,a)=>`<a class="t" data-w="${a}">${a}</a>`);
+    sh.innerHTML=`<div class="row" style="justify-content:space-between"><h3>${esc(term)}</h3><button id="cl">✕</button></div><div style="white-space:pre-wrap">${body}</div>`;
+    $("cl").onclick=()=>sh.style.display="none";
+  }catch(e){sh.innerHTML=`<p>${esc(e.message||"Fehler")}</p><button id="cl">✕</button>`;$("cl").onclick=()=>sh.style.display="none"}
+}
+
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-s],[data-t],[data-w],[data-o],[data-ren],[data-ex]");
+  if(!t)return;const d=t.dataset;
+  if(d.s!=null){cur=+d.s;ci=0;qi=0;score=0;picked=null;render()}
+  else if(d.t){tab=d.t;render()}
+  else if(d.w){explain(d.w)}
+  else if(d.ex){explain(d.ex)}
+  else if(d.ren){const n=prompt("Neuer Name für das Fach:",sub().name);if(n){sub().name=n;save();render()}}
+  else if(d.o!=null){picked=+d.o;if(picked==sub().quiz[qi].correct)score++;render()}
+});
+
+let selTxt="";
+document.addEventListener("selectionchange",()=>{
+  const v=$("view"),sel=getSelection(),b=$("sel");
+  const x=sel&&sel.toString().trim();
+  if(v&&x&&x.length<300&&v.contains(sel.anchorNode)){selTxt=x;b.style.display="block"}else b.style.display="none";
+});
+$("sel").onclick=()=>{$("sel").style.display="none";explain(selTxt,sub().text)};
+$("sel").addEventListener("mousedown",e=>e.preventDefault());
+render();
+</script>
+</body>
+</html>
